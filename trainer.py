@@ -144,8 +144,9 @@ class NodeClassificationTrainer:
         self.model = model
         self.data = data
         self.device = device
-        self.augmenter = augmenter  # augmenter is a BaseGraphAugmenter object
-        self.augmenter.init_with_data(data)  # initialize the augmenter
+        self.augmenter = augmenter.init_with_data(
+            data
+        )  # augmenter is a BaseGraphAugmenter object
         self.optimizer = torch.optim.Adam(
             model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
@@ -197,7 +198,7 @@ class NodeClassificationTrainer:
         train_mask = data.train_mask
 
         # perform graph augmentation
-        x, edge_index, gba_runtime_info = augmenter.augment(model, x, edge_index)
+        x, edge_index, aug_runtime_info = augmenter.augment(model, x, edge_index)
         y, train_mask = augmenter.adapt_labels_and_train_mask(y, train_mask)
 
         # record runtime
@@ -220,7 +221,7 @@ class NodeClassificationTrainer:
         # record runtime
         used_time = time.time() - start_time
         update_runtime_info = {"update_time(ms)": used_time * 1000}
-        update_runtime_info.update(gba_runtime_info)
+        update_runtime_info.update(aug_runtime_info)
         self.runtime_info.append(update_runtime_info)
 
         # evaluate on validation set and adjust learning rate
@@ -411,7 +412,7 @@ class NodeClassificationTrainer:
 
         return
 
-    def get_validation_score(self, eval_results):
+    def get_validation_score(self, eval_results: dict):
         """
         Computes the average validation score for model selection.
 
@@ -433,7 +434,13 @@ class NodeClassificationTrainer:
             ]
         )
 
-    def verbose(self, results, epoch, verbose_config, runtime: bool or str = None):
+    def verbose(
+        self,
+        results: dict,
+        epoch: int,
+        verbose_config: dict,
+        runtime: bool or str = None,
+    ):
         """
         Prints verbose training progress information.
 
