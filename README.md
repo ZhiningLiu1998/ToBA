@@ -24,10 +24,10 @@ from toba import TopoBalanceAugmenter
 augmenter = TopoBalanceAugmenter().init_with_data(data)
 
 for epoch in range(epochs):
-    # Augment the graph
+    # augment the graph
     x, edge_index, _ = augmenter.augment(model, x, edge_index)
     y, train_mask = augmenter.adapt_labels_and_train_mask(y, train_mask)
-    # Original training step
+    # original training step
     model.update(x, y, edge_index, train_mask)
 ```
 
@@ -36,7 +36,7 @@ for epoch in range(epochs):
 - [Examples Scripts](#examples-scripts)
   - [Command line](#command-line)
   - [Jupyter Notebook](#jupyter-notebook)
-- [Core API design](#core-api-design)
+- [API reference](#api-reference)
   - [TopoBalanceAugmenter](#topobalanceaugmenter)
   - [NodeClassificationTrainer](#nodeclassificationtrainer)
 - [Emprical Results](#emprical-results)
@@ -162,18 +162,16 @@ We also provide an example jupyter notebook [train_example.ipynb](https://github
   - 'step': [10, 20]
   - 'natural': [50, 100]
 
-## Core API design
+## API reference
 
 ### TopoBalanceAugmenter
 
 https://github.com/ZhiningLiu1998/ToBA/blob/main/toba.py#L170
 
-Main class that implements the ToBA augmentation algorithm, inheriting from [`BaseGraphAugmenter`](https://github.com/ZhiningLiu1998/ToBA/blob/main/toba.py#L11). Implements 3 core steps of ToBA: (1) node risk estimation, (2) candidate class selection, and (3) virtual topology augmentation.
-
-Core methods:
-- `init_with_data`: initialize the augmenter with graph data.
-- `augment`: perform topology-aware graph augmentation.
-- `adapt_labels_and_train_mask`: adapt labels and training mask after augmentation.
+Main class that implements the ToBA augmentation algorithm, inheriting from [`BaseGraphAugmenter`](https://github.com/ZhiningLiu1998/ToBA/blob/main/toba.py#L11). Implements 3 core steps of ToBA: 
+- (1) node risk estimation
+- (2) candidate class selection
+- (3) virtual topology augmentation.
 
 ```python
 class TopoBalanceAugmenter(BaseGraphAugmenter):
@@ -185,62 +183,41 @@ class TopoBalanceAugmenter(BaseGraphAugmenter):
         The augmentation mode. Must be one of ["dummy", "pred", "topo"].
     - random_state: int or None, optional (default: None)
         Random seed for reproducibility.
-
-    Methods:
-    - __init__(self, mode: str = "pred", random_state: int = None)
-        Initializes the TopoBalanceAugmenter instance.
-
-    - init_with_data(self, data: pyg.data.Data)
-        Initializes the augmenter with graph data.
-
-    - info(self)
-        Prints information about the augmenter.
-
-    - index_to_adj(x, edge_index, add_self_loop=False, remove_self_loop=False, sparse=False)
-        Converts edge indices to adjacency matrix.
-
-    - predict_proba(model, x, edge_index, return_numpy=False)
-        Computes predicted class probabilities using the model.
-
-    - edge_sampling(edge_index, edge_sampling_proba, random_state=None)
-        Performs edge sampling based on probability.
-
-    - get_group_mean(values, labels, classes)
-        Computes the mean of values within each class.
-
-    - get_virtual_node_features(x, y_pred, classes)
-        Computes virtual node features based on predicted labels.
-
-    - get_connectivity_distribution(y_pred, adj, n_class, n_node)
-        Computes the distribution of connectivity labels.
-
-    - adapt_labels_and_train_mask(self, y: torch.Tensor, train_mask: torch.Tensor)
-        Adapts labels and training mask after augmentation.
-
-    - augment(self, model, x, edge_index)
-        Performs topology-aware graph augmentation.
-
-    - get_node_risk(self, y_pred_proba, y_pred)
-        Computes node risk based on predicted class probabilities.
-
-    - get_node_similarity_to_candidate_classes(self, y_pred_proba, y_neighbor_distr)
-        Computes node similarity to candidate classes.
-
-    - get_virual_link_proba(self, node_similarities, y_pred)
-        Computes virtual link probabilities based on node similarities.
     """
 ```
+
+Core methods:
+- `init_with_data(data)`: initialize the augmenter with graph data.
+  - Parameters: 
+    - `data` : PyG data object
+  - Return: 
+    - `self` : TopoBalanceAugmenter
+- `augment(model, x, edge_index)`: perform topology-aware graph augmentation.
+  - Parameters: 
+    - `model` : torch.nn.Module, node classification model
+    - `x` : torch.Tensor, node feature matrix
+    - `edge_index` : torch.Tensor, sparse edge index
+  - Return: 
+    - `x_aug` : torch.Tensor, augmented node feature matrix
+    - `edge_index_aug`: torch.Tensor, augmented sparse edge index
+    - `info` : dict, augmentation info
+- `adapt_labels_and_train_mask(y, train_mask)`: adapt labels and training mask after augmentation.
+  - Parameters: 
+    - `y` : torch.Tensor, node label vector
+    - `train_mask` : torch.Tensor, training mask
+  - Return: 
+    - `new_y` : torch.Tensor, adapted node label vector
+    - `new_train_mask` : torch.Tensor, adapted training mask
 
 ### NodeClassificationTrainer
 
 https://github.com/ZhiningLiu1998/ToBA/blob/main/trainer.py#L14
 
 Trainer class for node classification tasks, centralizing the training workflow: 
-(1) model preparation and selection, (2) performance evaluation, (3) data augmentation, and (4) verbose logging.
-
-Core methods:
-- `train`: train the node classification model and perform evaluation.
-- `print_best_results`: print the evaluation results of the best model.
+- (1) model preparation and selection
+- (2) performance evaluation
+- (3) data augmentation
+- (4) verbose logging.
 
 ```python
 class NodeClassificationTrainer:
@@ -281,23 +258,18 @@ class NodeClassificationTrainer:
         Whether to enable tqdm progress bar.
     - random_state: int, optional
         Seed for random number generator.
-
-    Methods:
-    --------
-    - model_update(self)
-        Performs a single update step for the model.
-    - model_eval(self)
-        Evaluates the model on the validation and test sets.
-    - train(self, train_epoch=None, eval_freq=None, verbose_freq=None)
-        Trains the node classification model and performs evaluation.
-    - print_best_results(self)
-        Prints the evaluation results of the best model.
-    - get_validation_score(self, eval_results)
-        Computes the average validation score for model selection.
-    - verbose(self, results, epoch, verbose_config, runtime: bool or str = None)
-        Prints verbose training progress information.
     """
 ```
+
+Core methods:
+- `train`: train the node classification model and perform evaluation.
+  - Parameters:
+    - `train_epoch`: int, optional. Number of training epochs.
+    - `eval_freq`: int, optional. Frequency of evaluation during training.
+    - `verbose_freq`: int, optional. Frequency of verbose logging.
+  - Return:
+    - `model`: torch.nn.Module, trained node classification model.
+- `print_best_results`: print the evaluation results of the best model.
 
 ## Emprical Results
 
