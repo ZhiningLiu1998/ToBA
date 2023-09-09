@@ -31,6 +31,16 @@ for epoch in range(epochs):
     model.update(x, y, edge_index, train_mask)
 ```
 
+If you find this code or idea useful, please consider citing our work:
+```bibtex
+@article{liu2023topological,
+  title={Topological Augmentation for Class-Imbalanced Node Classification},
+  author={Liu, Zhining and Zeng, Zhichen and Qiu, Ruizhong and Yoo, Hyunsik and Zhou, David and Xu, Zhe and Zhu, Yada and Weldemariam, Kommy and He, Jingrui and Tong, Hanghang},
+  journal={arXiv preprint arXiv:2308.14181},
+  year={2023}
+}
+```
+
 ### Table of Contents
 - [Background](#background)
 - [Examples Scripts](#examples-scripts)
@@ -44,7 +54,6 @@ for epoch in range(epochs):
   - [On the effectiveness and versatility of TOBA](#on-the-effectiveness-and-versatility-of-toba)
   - [On the robustness of TOBA](#on-the-robustness-of-toba)
   - [On mitigating AMP and DMP](#on-mitigating-amp-and-dmp)
-- [Citing us](#citing-us)
 - [References](#references)
 
 ## Background
@@ -326,18 +335,6 @@ Please refer to our paper: https://arxiv.org/abs/2308.14181 for more details, in
 - further discussions on speedup of ToBA
 - limitations and future works
 
-
-## Citing us
-
-If you find this repository useful in your research, we would appreciate citation to our work:
-```bibtex
-@article{liu2023topological,
-  title={Topological Augmentation for Class-Imbalanced Node Classification},
-  author={Liu, Zhining and Zeng, Zhichen and Qiu, Ruizhong and Yoo, Hyunsik and Zhou, David and Xu, Zhe and Zhu, Yada and Weldemariam, Kommy and He, Jingrui and Tong, Hanghang},
-  journal={arXiv preprint arXiv:2308.14181},
-  year={2023}
-}
-```
 
 ## References
 
